@@ -1,0 +1,48 @@
+# =============================================================================
+#  Roles — one Role per namespace, least-privilege
+# =============================================================================
+
+# backend: read secrets (DB creds, JWT) and configmaps
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: finance-app-role
+  namespace: backend
+  labels:
+    app.kubernetes.io/part-of: finance-app
+rules:
+  - apiGroups: [""]
+    resources: ["secrets", "configmaps"]
+    verbs: ["get", "list", "watch"]
+
+# data: read secrets (DB credentials) and configmaps (init SQL)
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: finance-app-role
+  namespace: data
+  labels:
+    app.kubernetes.io/part-of: finance-app
+rules:
+  - apiGroups: [""]
+    resources: ["secrets", "configmaps"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "list"]
+
+# frontend: read configmaps only (no secrets needed for static SPA)
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: finance-app-role
+  namespace: frontend
+  labels:
+    app.kubernetes.io/part-of: finance-app
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch"]

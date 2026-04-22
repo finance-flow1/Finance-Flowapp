@@ -1,0 +1,51 @@
+# =============================================================================
+#  ReferenceGrants — Gateway API cross-namespace permission grants
+#
+#  The Gateway API requires a ReferenceGrant in the TARGET namespace
+#  whenever a resource in another namespace references something in it.
+#
+#  Scenario:
+#    HTTPRoute in backend ns  references Gateway in gate ns → need grant in gate
+#    HTTPRoute in frontend ns references Gateway in gate ns → need grant in gate
+#
+#  NOTE: backendRefs that stay in the same namespace as the HTTPRoute do NOT
+#        need a ReferenceGrant (same-namespace refs are always allowed).
+# =============================================================================
+
+# Grant: allow HTTPRoutes in the 'backend' namespace to attach to
+#        Gateways in the 'gate' namespace.
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: allow-backend-routes
+  namespace: gate                    # grant lives in the TARGET namespace (gate)
+  labels:
+    app.kubernetes.io/part-of: finance-app
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: backend             # allow HTTPRoutes FROM backend ns
+  to:
+    - group: gateway.networking.k8s.io
+      kind: Gateway                  # to reference Gateways in gate ns
+
+# Grant: allow HTTPRoutes in the 'frontend' namespace to attach to
+#        Gateways in the 'gate' namespace.
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: allow-frontend-routes
+  namespace: gate                    # grant lives in the TARGET namespace (gate)
+  labels:
+    app.kubernetes.io/part-of: finance-app
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: frontend            # allow HTTPRoutes FROM frontend ns
+  to:
+    - group: gateway.networking.k8s.io
+      kind: Gateway                  # to reference Gateways in gate ns

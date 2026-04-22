@@ -1,0 +1,42 @@
+# =============================================================================
+#  PVCs — one per microservice database
+#
+#  user-db-pvc  → used exclusively by user-service's PostgreSQL
+#  txn-db-pvc   → used exclusively by transaction-service's PostgreSQL
+#
+#  Both use nfs-storage StorageClass (ReadWriteOnce — single DB pod)
+# =============================================================================
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: user-db-pvc
+  namespace: data
+  labels:
+    app: user-db
+    app.kubernetes.io/part-of: finance-app
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: nfs-storage
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: txn-db-pvc
+  namespace: data
+  labels:
+    app: txn-db
+    app.kubernetes.io/part-of: finance-app
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: nfs-storage
+  resources:
+    requests:
+      storage: 10Gi

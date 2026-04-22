@@ -1,0 +1,40 @@
+# =============================================================================
+#  Namespaces — Personal Finance App
+#
+#  gate         → Kgateway (ingress tier, receives traffic from HAProxy)
+#  frontend     → Nginx SPA (React client)
+#  backend      → API Gateway + microservices (user-service, transaction-service)
+#  data         → Per-microservice PostgreSQL databases
+# =============================================================================
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gate
+  labels:
+    app.kubernetes.io/part-of: finance-app
+    purpose: ingress
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: frontend
+  labels:
+    app.kubernetes.io/part-of: finance-app
+    purpose: presentation
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: backend
+  labels:
+    app.kubernetes.io/part-of: finance-app
+    purpose: business-logic
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: data
+  labels:
+    app.kubernetes.io/part-of: finance-app
+    purpose: persistence

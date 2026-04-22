@@ -1,0 +1,21 @@
+# =============================================================================
+#  Service — txn-db  (ClusterIP, reachable as txn-db.data.svc.cluster.local)
+# =============================================================================
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: txn-db
+  namespace: data
+  labels:
+    app: txn-db
+    app.kubernetes.io/part-of: finance-app
+spec:
+  type: ClusterIP
+  selector:
+    app: txn-db
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+      protocol: TCP

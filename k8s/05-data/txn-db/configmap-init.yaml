@@ -1,0 +1,31 @@
+# =============================================================================
+#  ConfigMap — txn-db init SQL
+#  Only the transactions table lives here.
+#  NOTE: user_id has NO FK constraint — referential integrity is handled
+#        at the application layer (separate DBs = no cross-DB FKs).
+# =============================================================================
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: txn-db-init
+  namespace: data
+  labels:
+    app: txn-db
+    app.kubernetes.io/part-of: finance-app
+data:
+  init.sql: |
+    CREATE TABLE IF NOT EXISTS transactions (
+      id          SERIAL PRIMARY KEY,
+      user_id     INTEGER NOT NULL,
+      type        VARCHAR(10)   NOT NULL CHECK (type IN ('income', 'expense')),
+      amount      NUMERIC(12,2) NOT NULL CHECK (amount > 0),
+      category    VARCHAR(100)  NOT NULL,
+      description TEXT          DEFAULT '',
+      date        DATE          NOT NULL DEFAULT CURRENT_DATE,
+      created_at  TIMESTAMPTZ   NOT NULL DEFAULT NOW()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_transactions_user_id ON transactions(user_id);
+    CREATE INDEX IF NOT EXISTS idx_transactions_date     ON transactions(date);
+    CREATE INDEX IF NOT EXISTS idx_transactions_type     ON transactions(type);

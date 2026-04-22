@@ -1,0 +1,206 @@
+# =============================================================================
+#  Network Policies — backend namespace
+#
+#  api-gateway  → ingress from gate, egress to user-service + txn-service
+#  user-service → ingress from api-gateway, egress to data/user-db:5432
+#  txn-service  → ingress from api-gateway, egress to data/txn-db:5432
+#
+#  DEFAULT: Deny everything else
+# =============================================================================
+
+# Deny all by default
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: backend
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+
+# ── api-gateway ───────────────────────────────────────────────────────────────
+
+# api-gateway: ingress from gate ns only
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-api-gateway-ingress
+  namespace: backend
+spec:
+  podSelector:
+    matchLabels:
+      app: api-gateway
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: gate
+      ports:
+        - port: 4000
+          protocol: TCP
+
+# api-gateway: egress to user-service in same namespace
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-api-gateway-to-user-svc
+  namespace: backend
+spec:
+  podSelector:
+    matchLabels:
+      app: api-gateway
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: user-service
+      ports:
+        - port: 5001
+          protocol: TCP
+
+# api-gateway: egress to transaction-service in same namespace
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-api-gateway-to-txn-svc
+  namespace: backend
+spec:
+  podSelector:
+    matchLabels:
+      app: api-gateway
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: transaction-service
+      ports:
+        - port: 5002
+          protocol: TCP
+
+# ── user-service ──────────────────────────────────────────────────────────────
+
+# user-service: ingress from api-gateway only
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-user-svc-ingress
+  namespace: backend
+spec:
+  podSelector:
+    matchLabels:
+      app: user-service
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: api-gateway
+      ports:
+        - port: 5001
+          protocol: TCP
+
+# user-service: egress to user-db in data ns ONLY
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-user-svc-to-user-db
+  namespace: backend
+spec:
+  podSelector:
+    matchLabels:
+      app: user-service
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: data
+          podSelector:
+            matchLabels:
+              app: user-db
+      ports:
+        - port: 5432
+          protocol: TCP
+
+# ── transaction-service ───────────────────────────────────────────────────────
+
+# transaction-service: ingress from api-gateway only
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-txn-svc-ingress
+  namespace: backend
+spec:
+  podSelector:
+    matchLabels:
+      app: transaction-service
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: api-gateway
+      ports:
+        - port: 5002
+          protocol: TCP
+
+# transaction-service: egress to txn-db in data ns ONLY
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-txn-svc-to-txn-db
+  namespace: backend
+spec:
+  podSelector:
+    matchLabels:
+      app: transaction-service
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: data
+          podSelector:
+            matchLabels:
+              app: txn-db
+      ports:
+        - port: 5432
+          protocol: TCP
+
+# ── DNS egress for all pods in backend ───────────────────────────────────────
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: backend
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP

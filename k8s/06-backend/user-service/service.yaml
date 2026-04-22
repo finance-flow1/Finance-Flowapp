@@ -1,0 +1,21 @@
+# =============================================================================
+#  Service — user-service  (ClusterIP; api-gateway proxies to it)
+# =============================================================================
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+  namespace: backend
+  labels:
+    app: user-service
+    app.kubernetes.io/part-of: finance-app
+spec:
+  type: ClusterIP
+  selector:
+    app: user-service
+  ports:
+    - name: http
+      port: 5001
+      targetPort: 5001
+      protocol: TCP

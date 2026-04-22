@@ -1,0 +1,23 @@
+# =============================================================================
+#  Gateway — the actual proxy entry point, lives in gate namespace
+#
+#  Listens on port 80.  HAProxy hits the NodePort that kgateway exposes.
+#  allowedRoutes: from: All  →  HTTPRoutes in any namespace can attach here.
+# =============================================================================
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: finance-gateway
+  namespace: gate
+  labels:
+    app.kubernetes.io/part-of: finance-app
+spec:
+  gatewayClassName: kgateway
+  listeners:
+    - name: http
+      port: 80
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: All

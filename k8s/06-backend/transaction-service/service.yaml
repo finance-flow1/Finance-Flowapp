@@ -1,0 +1,21 @@
+# =============================================================================
+#  Service — transaction-service  (ClusterIP; api-gateway proxies to it)
+# =============================================================================
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: transaction-service
+  namespace: backend
+  labels:
+    app: transaction-service
+    app.kubernetes.io/part-of: finance-app
+spec:
+  type: ClusterIP
+  selector:
+    app: transaction-service
+  ports:
+    - name: http
+      port: 5002
+      targetPort: 5002
+      protocol: TCP

@@ -1,0 +1,101 @@
+# =============================================================================
+#  Deployment — transaction-service
+#
+#  DB: txn-db.data.svc.cluster.local:5432 (txndb)
+#  Secrets: txn-db-secret (mirrored to backend ns) + jwt-secret
+# =============================================================================
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transaction-service
+  namespace: backend
+  labels:
+    app: transaction-service
+    app.kubernetes.io/part-of: finance-app
+    app.kubernetes.io/component: microservice
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: transaction-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: transaction-service
+        app.kubernetes.io/part-of: finance-app
+    spec:
+      serviceAccountName: finance-app-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: transaction-service
+          image: area51devops/transaction-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5002
+              name: http
+          env:
+            - name: PORT
+              value: "5002"
+            - name: NODE_ENV
+              value: production
+            # Cross-namespace FQDN to the dedicated txn-db in data ns
+            - name: DB_HOST
+              value: txn-db.data.svc.cluster.local
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: txn-db-secret
+                  key: POSTGRES_DB
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: txn-db-secret
+                  key: POSTGRES_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: txn-db-secret
+                  key: POSTGRES_PASSWORD
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: JWT_SECRET
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5002
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5002
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]

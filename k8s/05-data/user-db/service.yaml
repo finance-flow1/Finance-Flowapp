@@ -1,0 +1,21 @@
+# =============================================================================
+#  Service — user-db  (ClusterIP, reachable as user-db.data.svc.cluster.local)
+# =============================================================================
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-db
+  namespace: data
+  labels:
+    app: user-db
+    app.kubernetes.io/part-of: finance-app
+spec:
+  type: ClusterIP
+  selector:
+    app: user-db
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+      protocol: TCP
