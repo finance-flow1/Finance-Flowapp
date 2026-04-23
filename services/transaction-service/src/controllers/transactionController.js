@@ -1,13 +1,38 @@
 const svc    = require('../services/transactionService');
 const logger = require('../utils/logger');
 
+/* ── Fire-and-forget notification ──────────────────────
+   Calls the notification-service over Docker's internal
+   network after a transaction is saved. Never throws. */
+const fireNotification = (token, tx) => {
+  const emoji  = tx.type === 'income' ? '📈' : '📉';
+  const label  = tx.type === 'income' ? 'Income'  : 'Expense';
+  const amount = `$${parseFloat(tx.amount).toFixed(2)}`;
+
+  fetch('http://notification-service:5003/api/v1/notifications', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: token,            // forward the user's JWT
+    },
+    body: JSON.stringify({
+      type:    tx.type === 'income' ? 'success' : 'info',
+      title:   `${emoji} ${label} recorded`,
+      message: `${amount} — ${tx.category}`,
+    }),
+  }).catch((err) => logger.warn(`Notification fire failed: ${err.message}`));
+};
+
 const create = async (req, res, next) => {
   try {
     const tx = await svc.create(req.userId, req.body);
     logger.info(`Transaction created: id=${tx.id} user=${req.userId}`);
     res.status(201).json({ success: true, data: tx });
+    // Notify after response is sent (non-blocking)
+    fireNotification(req.headers.authorization, tx);
   } catch (err) { next(err); }
 };
+
 
 const list = async (req, res, next) => {
   try {
