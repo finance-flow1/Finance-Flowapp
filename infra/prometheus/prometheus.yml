@@ -3,11 +3,6 @@ global:
   evaluation_interval: 15s
 
 scrape_configs:
-  - job_name: 'api-gateway'
-    static_configs:
-      - targets: ['gateway:4000']
-    metrics_path: '/metrics'
-
   - job_name: 'user-service'
     static_configs:
       - targets: ['user-service:5001']
@@ -16,4 +11,9 @@ scrape_configs:
   - job_name: 'transaction-service'
     static_configs:
       - targets: ['transaction-service:5002']
+    metrics_path: '/metrics'
+
+  - job_name: 'notification-service'
+    static_configs:
+      - targets: ['notification-service:5003']
     metrics_path: '/metrics'

@@ -5,13 +5,14 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
-    // Mirrors the nginx /api/ proxy block so `npm run dev` works
-    // outside Docker without changing any application code.
+    // Per-service proxy rules that mirror nginx.conf so `npm run dev`
+    // works locally without Docker and without changing any app code.
+    // Order matters: more-specific paths must come first.
     proxy: {
-      '/api': {
-        target: 'http://localhost:4000',
-        changeOrigin: true,
-      },
+      '/api/v1/auth':          { target: 'http://localhost:5001', changeOrigin: true },
+      '/api/v1/users':         { target: 'http://localhost:5001', changeOrigin: true },
+      '/api/v1/transactions':  { target: 'http://localhost:5002', changeOrigin: true },
+      '/api/v1/notifications': { target: 'http://localhost:5003', changeOrigin: true },
     },
   },
 });

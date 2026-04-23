@@ -26,4 +26,25 @@ const findById = async (id) => {
   return rows[0] || null;
 };
 
-module.exports = { createUser, findByEmail, findById };
+/** Admin: get all users with pagination */
+const findAll = async ({ page = 1, limit = 20 } = {}) => {
+  const offset = (page - 1) * limit;
+  const [countRes, dataRes] = await Promise.all([
+    pool.query('SELECT COUNT(*) FROM users'),
+    pool.query(
+      'SELECT id, name, email, role, created_at FROM users ORDER BY created_at DESC LIMIT $1 OFFSET $2',
+      [limit, offset]
+    ),
+  ]);
+  return {
+    users: dataRes.rows,
+    pagination: {
+      total: parseInt(countRes.rows[0].count),
+      page:  parseInt(page),
+      limit: parseInt(limit),
+      pages: Math.ceil(parseInt(countRes.rows[0].count) / limit),
+    },
+  };
+};
+
+module.exports = { createUser, findByEmail, findById, findAll };

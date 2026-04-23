@@ -1,39 +1,65 @@
 # =============================================================================
 #  HTTPRoutes — traffic routing rules attached to finance-gateway
 #
-#  Priority (Gateway API uses longest-prefix match):
-#    1.  /api  →  api-gateway.backend:4000    (more specific, matched first)
-#    2.  /     →  frontend.frontend:80        (catch-all, SPA fallback)
+#  Routing priority (Gateway API longest-prefix match):
+#    1.  /api/v1/auth          → user-service.backend:5001    (public, no JWT)
+#    2.  /api/v1/users         → user-service.backend:5001    (JWT required @ service)
+#    3.  /api/v1/transactions  → transaction-service.backend:5002
+#    4.  /api/v1/notifications → notification-service.backend:5003
+#    5.  /                     → frontend.frontend:80         (SPA catch-all)
 #
-#  IMPORTANT — each HTTPRoute lives in the same namespace as its backendRef
-#  service.  This means no cross-namespace backendRef ReferenceGrant is needed.
-#  The parentRef cross-namespace grant (HTTPRoute → Gateway in gate ns) is
-#  covered by referencegrants.yaml.
+#  NOTE: Each HTTPRoute lives in the same namespace as its backendRef service.
+#  Cross-namespace parentRef (HTTPRoute → Gateway in gate ns) is covered by
+#  referencegrants.yaml.
 # =============================================================================
 
-# ── /api → api-gateway (route owned by backend namespace) ────────────────────
+# ── /api/v1/* → backend services (route owned by backend namespace) ────────────
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: api-route
-  namespace: backend                 # same ns as backendRef service
+  namespace: backend
   labels:
-    app: api-gateway
     app.kubernetes.io/part-of: finance-app
 spec:
   parentRefs:
     - name: finance-gateway
-      namespace: gate                # cross-ns → covered by ReferenceGrant
+      namespace: gate
       sectionName: http
   rules:
+    # Auth routes → user-service
     - matches:
         - path:
             type: PathPrefix
-            value: /api
+            value: /api/v1/auth
       backendRefs:
-        - name: api-gateway          # same namespace as this HTTPRoute → no ReferenceGrant needed
-          port: 4000
+        - name: user-service
+          port: 5001
+    # User profile / admin → user-service
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/v1/users
+      backendRefs:
+        - name: user-service
+          port: 5001
+    # Transactions → transaction-service
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/v1/transactions
+      backendRefs:
+        - name: transaction-service
+          port: 5002
+    # Notifications → notification-service
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/v1/notifications
+      backendRefs:
+        - name: notification-service
+          port: 5003
 
 # ── /* → frontend (route owned by frontend namespace) ────────────────────────
 ---
@@ -41,14 +67,14 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: frontend-route
-  namespace: frontend                # same ns as backendRef service
+  namespace: frontend
   labels:
     app: frontend
     app.kubernetes.io/part-of: finance-app
 spec:
   parentRefs:
     - name: finance-gateway
-      namespace: gate                # cross-ns → covered by ReferenceGrant
+      namespace: gate
       sectionName: http
   rules:
     - matches:
@@ -56,5 +82,5 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: frontend             # same namespace as this HTTPRoute → no ReferenceGrant needed
+        - name: frontend
           port: 80

@@ -36,6 +36,7 @@ const remove = async (id, userId) => {
   return tx;
 };
 
-const analytics = (userId) => transactionModel.getAnalytics(userId);
+const analytics   = (userId) => transactionModel.getAnalytics(userId);
+const adminStats  = ()       => transactionModel.getAdminStats();
 
-module.exports = { create, list, getById, update, remove, analytics };
+module.exports = { create, list, getById, update, remove, analytics, adminStats };
