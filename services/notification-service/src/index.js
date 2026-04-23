@@ -8,8 +8,10 @@ const jwt      = require('jsonwebtoken');
 const winston  = require('winston');
 const prom     = require('prom-client');
 
-const pool            = require('./db/pool');
+const pool              = require('./db/pool');
 const { startConsumer } = require('./mq/consumer');
+const logger            = require('./utils/logger');
+
 
 const app  = express();
 const PORT = process.env.PORT || 5003;
@@ -24,16 +26,8 @@ const httpRequestsTotal = new prom.Counter({
   registers: [register],
 });
 
-// ── Logger ────────────────────────────────────────────
-const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
-  defaultMeta: { service: 'notification-service' },
-  transports: [new winston.transports.Console()],
-});
+// ── Logger is now in utils/logger.js ─────────────────
+
 
 // ── Security ──────────────────────────────────────────
 app.use(helmet());
