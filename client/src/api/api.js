@@ -58,9 +58,9 @@ export const transactions = {
 };
 
 export const notifications = {
-  list:   ()        => axiosInstance.get('/api/v1/notifications/'),
-  create: (body)    => axiosInstance.post('/api/v1/notifications/', body),
-  markRead: (id)    => axiosInstance.patch(`/api/v1/notifications/${id}/read`),
+  list:        ()     => axiosInstance.get('/api/v1/notifications/'),
+  markRead:    (id)   => axiosInstance.patch(`/api/v1/notifications/${id}/read`),
+  markAllRead: ()     => axiosInstance.patch('/api/v1/notifications/read-all'),
 };
 
 // Default export for legacy imports (axios.js was the old name)

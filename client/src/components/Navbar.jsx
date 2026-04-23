@@ -2,8 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { notifications as notifAPI } from '../api/api.js';
 
-const typeIcon = (type) =>
-  ({ success: '✅', warning: '⚠️', error: '🔴', info: 'ℹ️' }[type] || 'ℹ️');
+const typeIcon = (t) => ({ success:'✅', warning:'⚠️', error:'🔴', info:'ℹ️' }[t] || 'ℹ️');
 
 export default function Navbar() {
   const navigate  = useNavigate();
@@ -45,6 +44,14 @@ export default function Navbar() {
     try {
       await notifAPI.markRead(id);
       setNotifs((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    } catch (_) {}
+  };
+
+  /* ── mark all read ──────────────────────────────────── */
+  const markAllRead = async () => {
+    try {
+      await notifAPI.markAllRead();
+      setNotifs((prev) => prev.map((n) => ({ ...n, read: true })));
     } catch (_) {}
   };
 
@@ -147,9 +154,12 @@ export default function Navbar() {
             }}>
               <span style={{ fontWeight: 700, fontSize: '0.875rem' }}>🔔 Notifications</span>
               {unread > 0 && (
-                <span style={{ fontSize: '0.72rem', color: 'var(--expense)', fontWeight: 600 }}>
-                  {unread} unread
-                </span>
+                <button
+                  onClick={markAllRead}
+                  style={{ fontSize:'0.72rem', color:'var(--primary-light)', background:'none', border:'none', cursor:'pointer', fontWeight:600 }}
+                >
+                  Mark all read
+                </button>
               )}
             </div>
 

@@ -10,6 +10,7 @@ const { register, httpRequestsTotal, httpRequestDuration, httpErrorsTotal } = re
 const { swaggerUi, specs }   = require('./swagger/swagger');
 const transactionRoutes      = require('./routes/transactions');
 const pool                   = require('./db/pool');
+const publisher              = require('./mq/publisher');
 
 const app  = express();
 const PORT = process.env.PORT || 5002;
@@ -83,6 +84,9 @@ const start = async () => {
     logger.error('Could not connect to database. Exiting.');
     process.exit(1);
   }
+
+  // Start RabbitMQ publisher (non-blocking — retries on its own)
+  publisher.connect();
 
   app.listen(PORT, () => logger.info(`🚀 Transaction Service listening on port ${PORT}`));
 };
