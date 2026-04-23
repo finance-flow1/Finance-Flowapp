@@ -6,15 +6,17 @@ import { transactions } from '../api/api.js';
 const fmt = (n) => `$${Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 export default function Dashboard() {
-  const [analytics, setAnalytics] = useState(null);
-  const [recent,    setRecent]    = useState([]);
-  const [loading,   setLoading]   = useState(true);
-  const [error,     setError]     = useState('');
+  const [analytics,  setAnalytics]  = useState(null);
+  const [recent,     setRecent]     = useState([]);
+  const [loading,    setLoading]    = useState(true);
+  const [error,      setError]      = useState('');
+  const [retryCount, setRetryCount] = useState(0);
   const user = JSON.parse(localStorage.getItem('ff_user') || '{}');
 
   useEffect(() => {
     const load = async () => {
       setError('');
+      setLoading(true);
       try {
         const [aRes, tRes] = await Promise.all([
           transactions.analytics(),
@@ -31,12 +33,12 @@ export default function Dashboard() {
       }
     };
     load();
-  }, []);
+  }, [retryCount]); // retryCount increment triggers a fresh fetch
 
   const stats = analytics?.summary || {};
   const monthly = analytics?.monthly || [];
 
-  const reload = () => { setLoading(true); setAnalytics(null); setRecent([]); };
+  const reload = () => setRetryCount(n => n + 1);
 
   return (
     <div className="layout">

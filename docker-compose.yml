@@ -113,7 +113,7 @@ services:
     container_name: finance-client
     restart: unless-stopped
     ports:
-      - "3000:80"
+      - "80:80"
     depends_on:
       user-service:
         condition: service_healthy
