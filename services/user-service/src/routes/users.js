@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { getProfile, listUsers } = require('../controllers/authController');
+const { getProfile, listUsers, getAdminStats } = require('../controllers/authController');
 const { verifyToken, requireAdmin } = require('../middleware/auth');
 
 /**
@@ -27,6 +27,22 @@ router.get('/me', verifyToken, getProfile);
 
 /**
  * @swagger
+ * /api/v1/users/admin/stats:
+ *   get:
+ *     tags: [Users]
+ *     summary: Get system-wide user statistics (Admin only)
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User statistics
+ *       403:
+ *         description: Admin access required
+ */
+router.get('/admin/stats', verifyToken, requireAdmin, getAdminStats);
+
+/**
+ * @swagger
  * /api/v1/users:
  *   get:
  *     tags: [Users]
@@ -49,3 +65,4 @@ router.get('/me', verifyToken, getProfile);
 router.get('/', verifyToken, requireAdmin, listUsers);
 
 module.exports = router;
+

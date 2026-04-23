@@ -42,8 +42,9 @@ export const auth = {
 };
 
 export const users = {
-  me:      ()              => axiosInstance.get('/api/v1/users/me'),
-  list:    (params = {})   => axiosInstance.get('/api/v1/users',   { params }),
+  me:         ()              => axiosInstance.get('/api/v1/users/me'),
+  list:       (params = {})   => axiosInstance.get('/api/v1/users',              { params }),
+  adminStats: ()              => axiosInstance.get('/api/v1/users/admin/stats'),
 };
 
 export const transactions = {

@@ -1,5 +1,6 @@
 const authService  = require('../services/authService');
 const { findAll }  = require('../models/userModel');
+const pool         = require('../db/pool');
 const logger       = require('../utils/logger');
 
 const register = async (req, res, next) => {
@@ -44,4 +45,24 @@ const listUsers = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login, getProfile, listUsers };
+/** Admin: system-wide user statistics */
+const getAdminStats = async (req, res, next) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT
+        COUNT(*)::INTEGER                                                   AS total_users,
+        COUNT(*) FILTER (WHERE role = 'admin')::INTEGER                    AS total_admins,
+        COUNT(*) FILTER (WHERE role = 'user')::INTEGER                     AS total_regular_users,
+        COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '30 days')::INTEGER AS new_users_30d,
+        MIN(created_at)                                                     AS oldest_account,
+        MAX(created_at)                                                     AS newest_account
+      FROM users
+    `);
+    res.json({ success: true, data: rows[0] });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { register, login, getProfile, listUsers, getAdminStats };
+

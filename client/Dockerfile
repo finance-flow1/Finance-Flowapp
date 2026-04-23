@@ -1,6 +1,6 @@
 # ── Build stage ────────────────────────────────────────
-# No VITE_API_URL needed — nginx proxies /api/ to the gateway
-# at runtime over Docker's internal network.
+# No VITE_API_URL needed — nginx proxies each /api/v1/* prefix
+# directly to its microservice over Docker's internal network.
 FROM node:20-alpine AS builder
 
 WORKDIR /app

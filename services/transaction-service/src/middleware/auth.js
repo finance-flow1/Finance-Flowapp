@@ -2,19 +2,10 @@ const jwt    = require('jsonwebtoken');
 const logger = require('../utils/logger');
 
 /**
- * Verify JWT token — supports both direct calls and gateway-forwarded headers.
+ * Verify JWT token — JWT-only verification for Docker/direct deployments.
  * Sets req.userId and req.userRole on success.
  */
 const verifyToken = (req, res, next) => {
-  // Trust context headers injected by the gateway (defence-in-depth kept for compat)
-  const userId = req.headers['x-user-id'];
-  if (userId) {
-    req.userId   = parseInt(userId, 10);
-    req.userRole = req.headers['x-user-role'] || 'user';
-    return next();
-  }
-
-  // Fallback: verify JWT directly (direct calls / when no gateway is used)
   const authHeader = req.headers['authorization'];
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'Missing or invalid Authorization header' });
