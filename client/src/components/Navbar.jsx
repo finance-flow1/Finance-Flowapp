@@ -20,24 +20,26 @@ export default function Navbar() {
         <span className="sidebar-logo-text">FinanceFlow</span>
       </div>
 
-      <div className="nav-section-title">Main</div>
-
-      <NavLink to="/dashboard" className={navCls}>
-        <span className="nav-icon">📊</span>
-        <span>Dashboard</span>
-      </NavLink>
-
-      <NavLink to="/transactions" className={navCls}>
-        <span className="nav-icon">💳</span>
-        <span>Transactions</span>
-      </NavLink>
-
-      {isAdmin && (
+      {isAdmin ? (
+        /* ── Admin navigation: ONLY admin panel ───────────── */
         <>
-          <div className="nav-section-title" style={{ marginTop: 8 }}>Admin</div>
+          <div className="nav-section-title">Administration</div>
           <NavLink to="/admin" className={navCls}>
             <span className="nav-icon">🛡️</span>
             <span>Admin Panel</span>
+          </NavLink>
+        </>
+      ) : (
+        /* ── Regular user navigation ──────────────────────── */
+        <>
+          <div className="nav-section-title">Main</div>
+          <NavLink to="/dashboard" className={navCls}>
+            <span className="nav-icon">📊</span>
+            <span>Dashboard</span>
+          </NavLink>
+          <NavLink to="/transactions" className={navCls}>
+            <span className="nav-icon">💳</span>
+            <span>Transactions</span>
           </NavLink>
         </>
       )}
