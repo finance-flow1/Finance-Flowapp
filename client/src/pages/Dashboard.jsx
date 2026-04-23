@@ -9,10 +9,12 @@ export default function Dashboard() {
   const [analytics, setAnalytics] = useState(null);
   const [recent,    setRecent]    = useState([]);
   const [loading,   setLoading]   = useState(true);
+  const [error,     setError]     = useState('');
   const user = JSON.parse(localStorage.getItem('ff_user') || '{}');
 
   useEffect(() => {
     const load = async () => {
+      setError('');
       try {
         const [aRes, tRes] = await Promise.all([
           transactions.analytics(),
@@ -22,6 +24,8 @@ export default function Dashboard() {
         setRecent(tRes.data.data || []);
       } catch (err) {
         console.error('Dashboard load error', err);
+        const msg = err.response?.data?.error || err.message || 'Failed to load dashboard data.';
+        setError(`${err.response?.status ? `[${err.response.status}] ` : ''}${msg}`);
       } finally {
         setLoading(false);
       }
@@ -32,6 +36,8 @@ export default function Dashboard() {
   const stats = analytics?.summary || {};
   const monthly = analytics?.monthly || [];
 
+  const reload = () => { setLoading(true); setAnalytics(null); setRecent([]); };
+
   return (
     <div className="layout">
       <Navbar />
@@ -41,12 +47,21 @@ export default function Dashboard() {
           <p>Welcome back, <strong>{user.name}</strong> 👋</p>
         </div>
 
-        {loading ? (
+        {error && (
+          <div className="auth-card" style={{ padding: 32, textAlign: 'center', margin: '32px auto', maxWidth: 480 }}>
+            <div style={{ fontSize: 40, marginBottom: 12 }}>⚠️</div>
+            <h3 style={{ marginBottom: 8 }}>Could not load data</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: 20, fontFamily: 'monospace' }}>{error}</p>
+            <button className="btn btn-primary" onClick={reload}>🔄 Retry</button>
+          </div>
+        )}
+
+        {!error && loading ? (
           <div className="spinner-wrap">
             <div className="spinner" />
             <p className="spinner-text">Updating your financial summary...</p>
           </div>
-        ) : (
+        ) : !error && (
           <>
             {/* ── Stat cards ───────────────────────────── */}
             <div className="grid-3" style={{ marginBottom: 32 }}>

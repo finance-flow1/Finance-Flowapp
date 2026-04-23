@@ -13,11 +13,13 @@ export default function Transactions() {
   const [pagination,   setPagination]   = useState({ page: 1, pages: 1, total: 0 });
   const [filters,      setFilters]      = useState(initFilters);
   const [loading,      setLoading]      = useState(true);
-  const [modal,        setModal]        = useState(null); // null | 'create' | tx object (edit)
+  const [error,        setError]        = useState('');
+  const [modal,        setModal]        = useState(null);
   const [deleting,     setDeleting]     = useState(null);
 
   const fetchData = useCallback(async (page = 1) => {
     setLoading(true);
+    setError('');
     try {
       const params = { page, limit: 10, ...filters };
       const res = await transactions.list(params);
@@ -25,6 +27,8 @@ export default function Transactions() {
       setPagination(res.data.pagination || { page: 1, pages: 1, total: 0 });
     } catch (err) {
       console.error('Fetch transactions error', err);
+      const msg = err.response?.data?.error || err.message || 'Failed to load transactions.';
+      setError(`${err.response?.status ? `[${err.response.status}] ` : ''}${msg}`);
     } finally {
       setLoading(false);
     }
@@ -102,7 +106,14 @@ export default function Transactions() {
 
         {/* ── Table ─────────────────────────────────── */}
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          {loading ? (
+          {error ? (
+            <div style={{ padding: 48, textAlign: 'center' }}>
+              <div style={{ fontSize: 40, marginBottom: 12 }}>⚠️</div>
+              <h3 style={{ marginBottom: 8 }}>Could not load transactions</h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: 20, fontFamily: 'monospace' }}>{error}</p>
+              <button className="btn btn-primary" onClick={() => fetchData(1)}>🔄 Retry</button>
+            </div>
+          ) : loading ? (
             <div className="spinner-wrap"><div className="spinner" /><p className="spinner-text">Syncing transactions...</p></div>
           ) : data.length === 0 ? (
             <div className="empty-state">
