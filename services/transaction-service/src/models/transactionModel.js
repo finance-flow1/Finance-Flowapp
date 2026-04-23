@@ -115,6 +115,32 @@ const getAnalytics = async (userId) => {
   };
 };
 
+// ── Admin global stats ────────────────────────────────
+const getAdminStats = async () => {
+  const { rows } = await pool.query(
+    `SELECT
+       COUNT(*)                                                              AS total_transactions,
+       COUNT(DISTINCT user_id)                                               AS active_users,
+       COALESCE(SUM(CASE WHEN type='income'  THEN amount ELSE 0   END), 0)  AS total_income,
+       COALESCE(SUM(CASE WHEN type='expense' THEN amount ELSE 0   END), 0)  AS total_expense,
+       COALESCE(SUM(CASE WHEN type='income'  THEN amount ELSE -amount END), 0) AS net_balance,
+       COALESCE(AVG(amount), 0)                                             AS avg_transaction
+     FROM transactions`
+  );
+  const monthly = await pool.query(
+    `SELECT
+       TO_CHAR(date, 'YYYY-MM') AS month,
+       COUNT(*)                 AS count,
+       SUM(CASE WHEN type='income'  THEN amount ELSE 0 END) AS income,
+       SUM(CASE WHEN type='expense' THEN amount ELSE 0 END) AS expense
+     FROM transactions
+     WHERE date >= NOW() - INTERVAL '6 months'
+     GROUP BY TO_CHAR(date, 'YYYY-MM')
+     ORDER BY month ASC`
+  );
+  return { summary: rows[0], monthly: monthly.rows };
+};
+
 module.exports = {
   createTransaction,
   getTransactions,
@@ -122,4 +148,5 @@ module.exports = {
   updateTransaction,
   deleteTransaction,
   getAnalytics,
+  getAdminStats,
 };

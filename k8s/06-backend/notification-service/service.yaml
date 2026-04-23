@@ -1,0 +1,21 @@
+# =============================================================================
+#  Service — notification-service  (ClusterIP; kgateway HTTPRoute points here)
+# =============================================================================
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+  namespace: backend
+  labels:
+    app: notification-service
+    app.kubernetes.io/part-of: finance-app
+spec:
+  type: ClusterIP
+  selector:
+    app: notification-service
+  ports:
+    - name: http
+      port: 5003
+      targetPort: 5003
+      protocol: TCP

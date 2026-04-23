@@ -1,19 +1,17 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 
-const NAV = [
-  { to: '/dashboard',    icon: '📊', label: 'Dashboard' },
-  { to: '/transactions', icon: '💳', label: 'Transactions' },
-];
-
 export default function Navbar() {
   const navigate = useNavigate();
-  const user     = JSON.parse(localStorage.getItem('ff_user') || '{}');
+  const user = JSON.parse(localStorage.getItem('ff_user') || '{}');
+  const isAdmin = user.role === 'admin';
 
   const logout = () => {
     localStorage.removeItem('ff_token');
     localStorage.removeItem('ff_user');
     navigate('/login');
   };
+
+  const navCls = ({ isActive }) => `nav-item${isActive ? ' active' : ''}`;
 
   return (
     <aside className="sidebar">
@@ -22,30 +20,51 @@ export default function Navbar() {
         <span className="sidebar-logo-text">FinanceFlow</span>
       </div>
 
-      {NAV.map(({ to, icon, label }) => (
-        <NavLink
-          key={to}
-          to={to}
-          className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
-        >
-          <span>{icon}</span>
-          <span>{label}</span>
-        </NavLink>
-      ))}
+      <div className="nav-section-title">Main</div>
+
+      <NavLink to="/dashboard" className={navCls}>
+        <span className="nav-icon">📊</span>
+        <span>Dashboard</span>
+      </NavLink>
+
+      <NavLink to="/transactions" className={navCls}>
+        <span className="nav-icon">💳</span>
+        <span>Transactions</span>
+      </NavLink>
+
+      {isAdmin && (
+        <>
+          <div className="nav-section-title" style={{ marginTop: 8 }}>Admin</div>
+          <NavLink to="/admin" className={navCls}>
+            <span className="nav-icon">🛡️</span>
+            <span>Admin Panel</span>
+          </NavLink>
+        </>
+      )}
 
       <div className="nav-spacer" />
 
-      <div style={{ padding: '12px 14px', borderRadius: 'var(--radius-md)', background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', marginBottom: 12 }}>
-        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Signed in as</div>
-        <div style={{ fontSize: '0.88rem', fontWeight: 600, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {user.name || user.email}
+      {/* User card */}
+      <div className="user-card">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div className="user-avatar">
+            {(user.name || user.email || '?')[0].toUpperCase()}
+          </div>
+          <div style={{ overflow: 'hidden' }}>
+            <div className="user-card-name">{user.name || 'User'}</div>
+            <div className="user-card-email">{user.email}</div>
+          </div>
         </div>
-        <div style={{ fontSize: '0.75rem', color: 'var(--primary)', marginTop: 2 }}>{user.role}</div>
+        <div className="user-card-role">
+          <span className={`badge badge-${user.role === 'admin' ? 'admin' : 'user'}`}>
+            {user.role}
+          </span>
+        </div>
       </div>
 
       <button id="logout-btn" className="nav-item btn-danger" onClick={logout}>
-        <span>🚪</span>
-        <span>Logout</span>
+        <span className="nav-icon">🚪</span>
+        <span>Sign Out</span>
       </button>
     </aside>
   );

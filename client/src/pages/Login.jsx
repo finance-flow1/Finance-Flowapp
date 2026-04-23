@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import api from '../api/axios.js';
+import { auth } from '../api/api.js';
 
 export default function Login() {
   const navigate = useNavigate();
-  const [form, setForm]       = useState({ email: '', password: '' });
-  const [error, setError]     = useState('');
+  const [form,    setForm]    = useState({ email: '', password: '' });
+  const [error,   setError]   = useState('');
   const [loading, setLoading] = useState(false);
 
   const onChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -15,7 +15,7 @@ export default function Login() {
     setError('');
     setLoading(true);
     try {
-      const { data } = await api.post('/api/v1/auth/login', form);
+      const { data } = await auth.login(form);
       localStorage.setItem('ff_token', data.data.token);
       localStorage.setItem('ff_user',  JSON.stringify(data.data.user));
       navigate('/dashboard');
@@ -33,14 +33,15 @@ export default function Login() {
           <div className="auth-logo-icon">💰</div>
           <span className="auth-logo-text">FinanceFlow</span>
         </div>
+
         <h1 className="auth-title">Welcome back</h1>
         <p className="auth-subtitle">Sign in to manage your finances</p>
 
-        {error && <div className="auth-error">{error}</div>}
+        {error && <div className="auth-error">⚠️ {error}</div>}
 
         <form className="auth-form" onSubmit={onSubmit}>
           <div className="input-group">
-            <label htmlFor="login-email">Email</label>
+            <label htmlFor="login-email">Email Address</label>
             <input
               id="login-email"
               className="input"
@@ -67,17 +68,38 @@ export default function Login() {
               autoComplete="current-password"
             />
           </div>
-          <button id="login-submit" className="btn btn-primary" type="submit" disabled={loading} style={{ marginTop: 8 }}>
-            {loading ? 'Signing in…' : 'Sign In'}
+          <button
+            id="login-submit"
+            className="btn btn-primary btn-lg"
+            type="submit"
+            disabled={loading}
+            style={{ marginTop: 8, width: '100%', justifyContent: 'center' }}
+          >
+            {loading ? (
+              <><div className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} /> Signing in…</>
+            ) : (
+              '🚀 Sign In'
+            )}
           </button>
         </form>
 
+        <div className="auth-divider" style={{ margin: '20px 0 0' }}>
+          <span>or</span>
+        </div>
+
         <div className="auth-footer">
           Don't have an account?{' '}
-          <Link to="/register">Create one</Link>
+          <Link to="/register">Create one free</Link>
         </div>
-        <div style={{ marginTop: 16, padding: '10px 14px', background: 'rgba(99,102,241,0.08)', borderRadius: 'var(--radius-md)', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-          <strong style={{ color: 'var(--text-primary)' }}>Demo:</strong> admin@finance.com / Admin123!
+
+        <div className="auth-demo">
+          <span>🔑</span>
+          <div>
+            <strong>Demo admin:</strong>{' '}
+            <span style={{ fontFamily: 'monospace', fontSize: '0.78rem' }}>
+              admin@finance.com / Admin123!
+            </span>
+          </div>
         </div>
       </div>
     </div>

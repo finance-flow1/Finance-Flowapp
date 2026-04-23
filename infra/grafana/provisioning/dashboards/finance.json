@@ -18,9 +18,9 @@
       "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
       "id": 1,
       "options": { "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "auto", "colorMode": "background" },
-      "title": "Gateway Request Rate",
+      "title": "System Request Rate",
       "type": "stat",
-      "targets": [{ "expr": "sum(rate(http_requests_total{job=\"api-gateway\"}[5m]))", "legendFormat": "req/s", "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" } }]
+      "targets": [{ "expr": "sum(rate(http_requests_total[5m]))", "legendFormat": "req/s", "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" } }]
     },
     {
       "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
@@ -60,9 +60,9 @@
       "title": "Request Rate by Service",
       "type": "timeseries",
       "targets": [
-        { "expr": "sum(rate(http_requests_total{job=\"api-gateway\"}[5m]))", "legendFormat": "Gateway", "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" } },
         { "expr": "sum(rate(http_requests_total{job=\"user-service\"}[5m]))", "legendFormat": "User Service", "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" } },
-        { "expr": "sum(rate(http_requests_total{job=\"transaction-service\"}[5m]))", "legendFormat": "Transaction Service", "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" } }
+        { "expr": "sum(rate(http_requests_total{job=\"transaction-service\"}[5m]))", "legendFormat": "Transaction Service", "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" } },
+        { "expr": "sum(rate(http_requests_total{job=\"notification-service\"}[5m]))", "legendFormat": "Notification Service", "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" } }
       ]
     },
     {
@@ -77,9 +77,9 @@
       "title": "P95 Latency by Service",
       "type": "timeseries",
       "targets": [
-        { "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_ms_bucket{job=\"api-gateway\"}[5m])) by (le))", "legendFormat": "Gateway p95", "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" } },
         { "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_ms_bucket{job=\"user-service\"}[5m])) by (le))", "legendFormat": "User Service p95", "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" } },
-        { "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_ms_bucket{job=\"transaction-service\"}[5m])) by (le))", "legendFormat": "Transaction Service p95", "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" } }
+        { "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_ms_bucket{job=\"transaction-service\"}[5m])) by (le))", "legendFormat": "Transaction Service p95", "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" } },
+        { "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_ms_bucket{job=\"notification-service\"}[5m])) by (le))", "legendFormat": "Notification Service p95", "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" } }
       ]
     },
     {
@@ -109,5 +109,5 @@
   "timezone": "browser",
   "title": "Finance Microservices",
   "uid": "finance-microservices",
-  "version": 1
+  "version": 2
 }

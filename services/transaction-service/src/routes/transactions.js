@@ -1,10 +1,13 @@
 const router = require('express').Router();
 const ctrl   = require('../controllers/transactionController');
 const { validate, transactionSchema } = require('../middleware/validate');
-const { verifyToken } = require('../middleware/auth');
+const { verifyToken, requireAdmin }   = require('../middleware/auth');
 
 // All transaction routes require auth
 router.use(verifyToken);
+
+// Admin: global stats (must be before /:id)
+router.get('/admin/stats', requireAdmin, ctrl.getAdminStats);
 
 /**
  * @swagger

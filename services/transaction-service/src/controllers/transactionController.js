@@ -49,4 +49,11 @@ const getAnalytics = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-module.exports = { create, list, getById, update, remove, getAnalytics };
+const getAdminStats = async (req, res, next) => {
+  try {
+    const data = await svc.adminStats();
+    res.json({ success: true, data });
+  } catch (err) { next(err); }
+};
+
+module.exports = { create, list, getById, update, remove, getAnalytics, getAdminStats };
