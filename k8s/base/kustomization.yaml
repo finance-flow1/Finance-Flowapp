@@ -14,43 +14,32 @@ kind: Kustomization
 
 resources:
   # RBAC — single SA + Role + RoleBinding (namespace stamped by overlay)
-  - ../01-rbac/service-accounts.yaml
-  - ../01-rbac/roles.yaml
-  - ../01-rbac/role-bindings.yaml
+  - ../01-rbac
 
   # Secrets
-  - ../02-secrets/jwt-secret.yaml
-  - ../02-secrets/postgres-secret.yaml
-  - ../02-secrets/rabbitmq-secret.yaml
+  - ../02-secrets
 
   # Storage — PVC only (StorageClass is cluster-scoped, applied once separately)
-  - ../03-storage/pvcs.yaml
+  - ../03-storage
 
   # Data layer
-  - ../05-data/postgres/configmap-init.yaml
-  - ../05-data/postgres/statefulset.yaml
-  - ../05-data/postgres/service.yaml
-  - ../05-data/rabbitmq/deployment.yaml
-  - ../05-data/rabbitmq/service.yaml
+  - ../05-data/postgres
+  - ../05-data/rabbitmq
 
   # Backend microservices
-  - ../06-backend/user-service/deployment.yaml
-  - ../06-backend/user-service/service.yaml
-  - ../06-backend/transaction-service/deployment.yaml
-  - ../06-backend/transaction-service/service.yaml
-  - ../06-backend/notification-service/deployment.yaml
-  - ../06-backend/notification-service/service.yaml
+  - ../06-backend/user-service
+  - ../06-backend/transaction-service
+  - ../06-backend/notification-service
 
   # Frontend (Nginx SPA + reverse proxy)
-  - ../07-frontend/deployment.yaml
-  - ../07-frontend/service.yaml
+  - ../07-frontend
 
   # Network policies (single-namespace, matches docker-compose arch)
-  - ../04-network-policies/base-netpol.yaml
+  - ../04-network-policies
 
   # Gateway API routes — HTTPRoutes only (namespace stamped by overlay)
   # gateway.yaml + referencegrants.yaml are in k8s/08-gateway (infra, applied once)
-  - ../08-gateway/httproutes.yaml
+  - ../08-gateway/routes
 
 commonLabels:
   app.kubernetes.io/part-of: finance-app
