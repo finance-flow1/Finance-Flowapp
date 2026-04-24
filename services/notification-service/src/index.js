@@ -69,7 +69,7 @@ app.get('/health', (_req, res) =>
 );
 
 // ── List notifications for current user ───────────────
-app.get('/api/v1/notifications', verifyToken, async (req, res) => {
+app.get('/notifications', verifyToken, async (req, res) => {
   try {
     const { rows } = await pool.query(
       `SELECT id, user_id AS "userId", type, title, message, read,
@@ -88,7 +88,7 @@ app.get('/api/v1/notifications', verifyToken, async (req, res) => {
 });
 
 // ── Mark notification as read ─────────────────────────
-app.patch('/api/v1/notifications/:id/read', verifyToken, async (req, res) => {
+app.patch('/notifications/:id/read', verifyToken, async (req, res) => {
   try {
     const { rows } = await pool.query(
       `UPDATE notifications SET read = TRUE
@@ -105,7 +105,7 @@ app.patch('/api/v1/notifications/:id/read', verifyToken, async (req, res) => {
 });
 
 // ── Mark all as read ──────────────────────────────────
-app.patch('/api/v1/notifications/read-all', verifyToken, async (req, res) => {
+app.patch('/notifications/read-all', verifyToken, async (req, res) => {
   try {
     await pool.query(
       'UPDATE notifications SET read = TRUE WHERE user_id = $1 AND read = FALSE',

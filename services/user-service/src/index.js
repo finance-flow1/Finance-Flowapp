@@ -58,8 +58,8 @@ app.get('/health', async (_req, res) => {
 });
 
 // ── Routes ────────────────────────────────────────────
-app.use('/api/v1/auth',  authRoutes);
-app.use('/api/v1/users', userRoutes);
+app.use('/auth',  authRoutes);
+app.use('/users', userRoutes);
 
 // ── Global error handler ──────────────────────────────
 app.use((err, _req, res, _next) => {

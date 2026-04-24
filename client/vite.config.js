@@ -9,10 +9,10 @@ export default defineConfig({
     // works locally without Docker and without changing any app code.
     // Order matters: more-specific paths must come first.
     proxy: {
-      '/api/v1/auth':          { target: 'http://localhost:5001', changeOrigin: true },
-      '/api/v1/users':         { target: 'http://localhost:5001', changeOrigin: true },
-      '/api/v1/transactions':  { target: 'http://localhost:5002', changeOrigin: true },
-      '/api/v1/notifications': { target: 'http://localhost:5003', changeOrigin: true },
+      '/api/v1/auth':          { target: 'http://localhost:5001', changeOrigin: true, rewrite: (path) => path.replace(/^\/api\/v1/, '') },
+      '/api/v1/users':         { target: 'http://localhost:5001', changeOrigin: true, rewrite: (path) => path.replace(/^\/api\/v1/, '') },
+      '/api/v1/transactions':  { target: 'http://localhost:5002', changeOrigin: true, rewrite: (path) => path.replace(/^\/api\/v1/, '') },
+      '/api/v1/notifications': { target: 'http://localhost:5003', changeOrigin: true, rewrite: (path) => path.replace(/^\/api\/v1/, '') },
     },
   },
 });

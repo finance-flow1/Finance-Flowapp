@@ -57,7 +57,7 @@ app.get('/health', async (_req, res) => {
 });
 
 // ── Routes ────────────────────────────────────────────
-app.use('/api/v1/transactions', transactionRoutes);
+app.use('/transactions', transactionRoutes);
 
 // ── Global error handler ──────────────────────────────
 app.use((err, _req, res, _next) => {
