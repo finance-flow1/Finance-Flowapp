@@ -1,12 +1,12 @@
 # =============================================================================
-#  Service — user-service  (ClusterIP; api-gateway proxies to it)
+#  Service — user-service (ClusterIP; frontend nginx proxies /api/v1/auth + /api/v1/users)
+#  Namespace stamped by Kustomize (dev | prod).
 # =============================================================================
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: user-service
-  namespace: backend
   labels:
     app: user-service
     app.kubernetes.io/part-of: finance-app

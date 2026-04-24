@@ -1,0 +1,56 @@
+# =============================================================================
+#  Kustomize BASE
+#  References all environment-agnostic application resources.
+#
+#  DO NOT apply directly. Use:
+#    kubectl apply -k k8s/dev
+#    kubectl apply -k k8s/prod
+#
+#  Gateway infrastructure is applied separately (once per cluster):
+#    kubectl apply -k k8s/08-gateway
+# =============================================================================
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  # RBAC — single SA + Role + RoleBinding (namespace stamped by overlay)
+  - ../01-rbac/service-accounts.yaml
+  - ../01-rbac/roles.yaml
+  - ../01-rbac/role-bindings.yaml
+
+  # Secrets
+  - ../02-secrets/jwt-secret.yaml
+  - ../02-secrets/postgres-secret.yaml
+  - ../02-secrets/rabbitmq-secret.yaml
+
+  # Storage — PVC only (StorageClass is cluster-scoped, applied once separately)
+  - ../03-storage/pvcs.yaml
+
+  # Data layer
+  - ../05-data/postgres/configmap-init.yaml
+  - ../05-data/postgres/deployment.yaml
+  - ../05-data/postgres/service.yaml
+  - ../05-data/rabbitmq/deployment.yaml
+  - ../05-data/rabbitmq/service.yaml
+
+  # Backend microservices
+  - ../06-backend/user-service/deployment.yaml
+  - ../06-backend/user-service/service.yaml
+  - ../06-backend/transaction-service/deployment.yaml
+  - ../06-backend/transaction-service/service.yaml
+  - ../06-backend/notification-service/deployment.yaml
+  - ../06-backend/notification-service/service.yaml
+
+  # Frontend (Nginx SPA + reverse proxy)
+  - ../07-frontend/deployment.yaml
+  - ../07-frontend/service.yaml
+
+  # Network policies (single-namespace, matches docker-compose arch)
+  - ../04-network-policies/base-netpol.yaml
+
+  # Gateway API routes — HTTPRoutes only (namespace stamped by overlay)
+  # gateway.yaml + referencegrants.yaml are in k8s/08-gateway (infra, applied once)
+  - ../08-gateway/httproutes.yaml
+
+commonLabels:
+  app.kubernetes.io/part-of: finance-app

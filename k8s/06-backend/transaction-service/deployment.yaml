@@ -1,21 +1,18 @@
 # =============================================================================
 #  Deployment — transaction-service
-#
-#  DB: txn-db.data.svc.cluster.local:5432 (txndb)
-#  Secrets: txn-db-secret (mirrored to backend ns) + jwt-secret
+#  Namespace stamped by Kustomize (dev | prod).
+#  DB: postgres:5432 · MQ: rabbitmq:5672
 # =============================================================================
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: transaction-service
-  namespace: backend
   labels:
     app: transaction-service
     app.kubernetes.io/part-of: finance-app
     app.kubernetes.io/component: microservice
 spec:
-  replicas: 2
+  replicas: 2                   # overridden by Kustomize patch
   selector:
     matchLabels:
       app: transaction-service
@@ -47,31 +44,35 @@ spec:
               value: "5002"
             - name: NODE_ENV
               value: production
-            # Cross-namespace FQDN to the dedicated txn-db in data ns
             - name: DB_HOST
-              value: txn-db.data.svc.cluster.local
+              value: postgres
             - name: DB_PORT
               value: "5432"
             - name: DB_NAME
               valueFrom:
                 secretKeyRef:
-                  name: txn-db-secret
+                  name: postgres-secret
                   key: POSTGRES_DB
             - name: DB_USER
               valueFrom:
                 secretKeyRef:
-                  name: txn-db-secret
+                  name: postgres-secret
                   key: POSTGRES_USER
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: txn-db-secret
+                  name: postgres-secret
                   key: POSTGRES_PASSWORD
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: jwt-secret
                   key: JWT_SECRET
+            - name: RABBITMQ_URL
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secret
+                  key: RABBITMQ_URL
           readinessProbe:
             httpGet:
               path: /health

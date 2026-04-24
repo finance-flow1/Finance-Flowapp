@@ -1,12 +1,11 @@
 # =============================================================================
-#  Service — notification-service  (ClusterIP; kgateway HTTPRoute points here)
+#  Service — notification-service (ClusterIP; frontend nginx proxies /api/v1/notifications)
+#  Namespace stamped by Kustomize (dev | prod).
 # =============================================================================
----
 apiVersion: v1
 kind: Service
 metadata:
   name: notification-service
-  namespace: backend
   labels:
     app: notification-service
     app.kubernetes.io/part-of: finance-app

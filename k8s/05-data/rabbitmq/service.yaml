@@ -1,21 +1,22 @@
 # =============================================================================
-#  Service — user-db  (ClusterIP, reachable as user-db.data.svc.cluster.local)
+#  Service — rabbitmq
 # =============================================================================
----
 apiVersion: v1
 kind: Service
 metadata:
-  name: user-db
-  namespace: data
+  name: rabbitmq
   labels:
-    app: user-db
+    app: rabbitmq
     app.kubernetes.io/part-of: finance-app
 spec:
-  type: ClusterIP
   selector:
-    app: user-db
+    app: rabbitmq
   ports:
-    - name: postgres
-      port: 5432
-      targetPort: 5432
+    - name: amqp
+      port: 5672
+      targetPort: 5672
+      protocol: TCP
+    - name: management
+      port: 15672
+      targetPort: 15672
       protocol: TCP

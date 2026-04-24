@@ -1,0 +1,42 @@
+# =============================================================================
+#  Patch — replica counts for dev (scale everything to 1)
+#
+#  Applied to ALL Deployments via the overlay's labelSelector.
+#  Databases (postgres, rabbitmq) are already replicas: 1 in base.
+# =============================================================================
+
+# user-service → 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+spec:
+  replicas: 1
+
+# transaction-service → 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transaction-service
+spec:
+  replicas: 1
+
+# notification-service → 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+spec:
+  replicas: 1
+
+# frontend → 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1

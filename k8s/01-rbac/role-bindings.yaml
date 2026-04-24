@@ -1,50 +1,16 @@
 # =============================================================================
-#  RoleBindings — bind finance-app-sa to finance-app-role in each namespace
+#  RoleBinding — binds finance-app-sa to finance-app-role
+#  Namespace is stamped by Kustomize (dev | prod).
 # =============================================================================
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: finance-app-binding
-  namespace: backend
   labels:
     app.kubernetes.io/part-of: finance-app
 subjects:
   - kind: ServiceAccount
-    name: finance-app-sa
-    namespace: backend
-roleRef:
-  kind: Role
-  name: finance-app-role
-  apiGroup: rbac.authorization.k8s.io
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: finance-app-binding
-  namespace: data
-  labels:
-    app.kubernetes.io/part-of: finance-app
-subjects:
-  - kind: ServiceAccount
-    name: finance-app-sa
-    namespace: data
-roleRef:
-  kind: Role
-  name: finance-app-role
-  apiGroup: rbac.authorization.k8s.io
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: finance-app-binding
-  namespace: frontend
-  labels:
-    app.kubernetes.io/part-of: finance-app
-subjects:
-  - kind: ServiceAccount
-    name: finance-app-sa
-    namespace: frontend
+    name: finance-app-sa   # namespace auto-resolved from metadata.namespace
 roleRef:
   kind: Role
   name: finance-app-role

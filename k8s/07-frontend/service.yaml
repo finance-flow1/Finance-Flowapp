@@ -1,12 +1,11 @@
 # =============================================================================
-#  Service — frontend  (ClusterIP; Kgateway HTTPRoute /* points here)
+#  Service — frontend (ClusterIP; kgateway HTTPRoute /* points here)
+#  Namespace stamped by Kustomize (dev | prod).
 # =============================================================================
----
 apiVersion: v1
 kind: Service
 metadata:
   name: frontend
-  namespace: frontend
   labels:
     app: frontend
     app.kubernetes.io/part-of: finance-app

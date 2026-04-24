@@ -1,0 +1,39 @@
+# =============================================================================
+#  Patch — replica counts for prod (HA, 2+ replicas)
+# =============================================================================
+
+# user-service → 2
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+spec:
+  replicas: 2
+
+# transaction-service → 2
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transaction-service
+spec:
+  replicas: 2
+
+# notification-service → 2
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+spec:
+  replicas: 2
+
+# frontend → 3 (higher traffic surface)
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 3

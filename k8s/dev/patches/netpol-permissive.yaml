@@ -1,0 +1,20 @@
+# =============================================================================
+#  Patch — permissive NetworkPolicy for dev
+#
+#  In dev, we replace the strict default-deny-all with a rule that
+#  allows all traffic within the same namespace. This makes debugging
+#  and integration testing much easier without fighting network policies.
+# =============================================================================
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - {}          # Allow ALL ingress within same namespace
+  egress:
+    - {}          # Allow ALL egress within same namespace

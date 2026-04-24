@@ -1,27 +1,29 @@
 # =============================================================================
-#  Deployment — txn-db (PostgreSQL for transaction-service exclusively)
+#  Deployment — postgres (unified single DB)
+#
+#  Replaces separate user-db and txn-db.
+#  All services connect to this single instance.
+#  Namespace is stamped by Kustomize (dev | prod).
 # =============================================================================
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: txn-db
-  namespace: data
+  name: postgres
   labels:
-    app: txn-db
+    app: postgres
     app.kubernetes.io/part-of: finance-app
     app.kubernetes.io/component: database
 spec:
-  replicas: 1
+  replicas: 1          # DBs are always 1 (RWO PVC)
   selector:
     matchLabels:
-      app: txn-db
+      app: postgres
   strategy:
-    type: Recreate
+    type: Recreate     # Required for RWO PVC
   template:
     metadata:
       labels:
-        app: txn-db
+        app: postgres
         app.kubernetes.io/part-of: finance-app
     spec:
       serviceAccountName: finance-app-sa
@@ -38,17 +40,17 @@ spec:
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: txn-db-secret
+                  name: postgres-secret
                   key: POSTGRES_USER
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: txn-db-secret
+                  name: postgres-secret
                   key: POSTGRES_PASSWORD
             - name: POSTGRES_DB
               valueFrom:
                 secretKeyRef:
-                  name: txn-db-secret
+                  name: postgres-secret
                   key: POSTGRES_DB
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
@@ -87,7 +89,7 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: txn-db-pvc
+            claimName: postgres-pvc
         - name: init-sql
           configMap:
-            name: txn-db-init
+            name: postgres-init

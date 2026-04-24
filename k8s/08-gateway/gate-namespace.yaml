@@ -1,11 +1,12 @@
 # =============================================================================
-#  ServiceAccount — single SA per environment namespace
-#  Namespace is stamped by Kustomize (dev | prod).
-#  Consolidated from old 3-namespace setup (backend + data + frontend).
+#  Namespace — gate (cluster-level ingress namespace for kgateway)
+#  Applied once as part of gateway infrastructure setup.
 # =============================================================================
 apiVersion: v1
-kind: ServiceAccount
+kind: Namespace
 metadata:
-  name: finance-app-sa
+  name: gate
   labels:
     app.kubernetes.io/part-of: finance-app
+    purpose: ingress
+    kubernetes.io/metadata.name: gate

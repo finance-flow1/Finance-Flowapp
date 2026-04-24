@@ -1,51 +1,47 @@
 # =============================================================================
-#  ReferenceGrants — Gateway API cross-namespace permission grants
+#  ReferenceGrants — allow HTTPRoutes in dev/prod to attach to Gateway in gate
 #
-#  The Gateway API requires a ReferenceGrant in the TARGET namespace
-#  whenever a resource in another namespace references something in it.
+#  Gateway lives in the 'gate' namespace (cluster infrastructure).
+#  HTTPRoutes are stamped with dev or prod by Kustomize.
+#  ReferenceGrant MUST live in the TARGET namespace (gate) and name the
+#  SOURCE namespace. We provide one grant per environment.
 #
-#  Scenario:
-#    HTTPRoute in backend ns  references Gateway in gate ns → need grant in gate
-#    HTTPRoute in frontend ns references Gateway in gate ns → need grant in gate
-#
-#  NOTE: backendRefs that stay in the same namespace as the HTTPRoute do NOT
-#        need a ReferenceGrant (same-namespace refs are always allowed).
+#  Apply once per cluster (before deploying dev/prod):
+#    kubectl apply -f k8s/08-gateway/referencegrants.yaml
 # =============================================================================
 
-# Grant: allow HTTPRoutes in the 'backend' namespace to attach to
-#        Gateways in the 'gate' namespace.
+# Grant: HTTPRoutes in 'dev' → Gateway in 'gate'
 ---
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: ReferenceGrant
 metadata:
-  name: allow-backend-routes
-  namespace: gate                    # grant lives in the TARGET namespace (gate)
+  name: allow-dev-routes
+  namespace: gate
   labels:
     app.kubernetes.io/part-of: finance-app
 spec:
   from:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
-      namespace: backend             # allow HTTPRoutes FROM backend ns
+      namespace: dev
   to:
     - group: gateway.networking.k8s.io
-      kind: Gateway                  # to reference Gateways in gate ns
+      kind: Gateway
 
-# Grant: allow HTTPRoutes in the 'frontend' namespace to attach to
-#        Gateways in the 'gate' namespace.
+# Grant: HTTPRoutes in 'prod' → Gateway in 'gate'
 ---
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: ReferenceGrant
 metadata:
-  name: allow-frontend-routes
-  namespace: gate                    # grant lives in the TARGET namespace (gate)
+  name: allow-prod-routes
+  namespace: gate
   labels:
     app.kubernetes.io/part-of: finance-app
 spec:
   from:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
-      namespace: frontend            # allow HTTPRoutes FROM frontend ns
+      namespace: prod
   to:
     - group: gateway.networking.k8s.io
-      kind: Gateway                  # to reference Gateways in gate ns
+      kind: Gateway

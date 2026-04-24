@@ -1,18 +1,18 @@
 # =============================================================================
 #  Deployment — notification-service
+#  Namespace stamped by Kustomize (dev | prod).
+#  DB: postgres:5432 · MQ consumer: rabbitmq:5672
 # =============================================================================
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: notification-service
-  namespace: backend
   labels:
     app: notification-service
     app.kubernetes.io/part-of: finance-app
     app.kubernetes.io/component: microservice
 spec:
-  replicas: 2
+  replicas: 2                   # overridden by Kustomize patch
   selector:
     matchLabels:
       app: notification-service
@@ -44,11 +44,35 @@ spec:
               value: "5003"
             - name: NODE_ENV
               value: production
+            - name: DB_HOST
+              value: postgres
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_DB
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: jwt-secret
                   key: JWT_SECRET
+            - name: RABBITMQ_URL
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secret
+                  key: RABBITMQ_URL
           readinessProbe:
             httpGet:
               path: /health

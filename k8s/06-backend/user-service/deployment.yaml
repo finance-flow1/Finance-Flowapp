@@ -1,21 +1,18 @@
 # =============================================================================
 #  Deployment — user-service
-#
-#  DB: user-db.data.svc.cluster.local:5432 (userdb)
-#  Secrets: user-db-secret (mirrored to backend ns) + jwt-secret
+#  Namespace stamped by Kustomize (dev | prod).
+#  DB: postgres:5432 (same namespace) via postgres-secret
 # =============================================================================
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: user-service
-  namespace: backend
   labels:
     app: user-service
     app.kubernetes.io/part-of: finance-app
     app.kubernetes.io/component: microservice
 spec:
-  replicas: 2
+  replicas: 2                   # overridden by Kustomize patch
   selector:
     matchLabels:
       app: user-service
@@ -47,25 +44,24 @@ spec:
               value: "5001"
             - name: NODE_ENV
               value: production
-            # Cross-namespace FQDN to the dedicated user-db in data ns
             - name: DB_HOST
-              value: user-db.data.svc.cluster.local
+              value: postgres        # local ClusterIP service (same namespace)
             - name: DB_PORT
               value: "5432"
             - name: DB_NAME
               valueFrom:
                 secretKeyRef:
-                  name: user-db-secret
+                  name: postgres-secret
                   key: POSTGRES_DB
             - name: DB_USER
               valueFrom:
                 secretKeyRef:
-                  name: user-db-secret
+                  name: postgres-secret
                   key: POSTGRES_USER
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: user-db-secret
+                  name: postgres-secret
                   key: POSTGRES_PASSWORD
             - name: JWT_SECRET
               valueFrom:

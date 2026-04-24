@@ -1,0 +1,49 @@
+# =============================================================================
+#  Kustomize OVERLAY — dev
+#
+#  kubectl apply -k k8s/dev
+#
+#  What this overlay does:
+#    · Creates the "dev" namespace
+#    · Stamps namespace: dev on ALL resources
+#    · Patches replicas → 1 (cost-saving for dev)
+#    · Applies permissive network policy (allow all same-namespace traffic)
+#    · Adds IMAGE tag suffix :dev for local image variants
+# =============================================================================
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: dev
+
+resources:
+  - ../base                          # all base resources
+  - namespace.yaml                   # creates the "dev" namespace first
+
+patches:
+  # ── Replica counts → 1 in dev ───────────────────────────────────────────
+  - path: patches/replicas.yaml
+    target:
+      kind: Deployment
+      labelSelector: "app.kubernetes.io/part-of=finance-app"
+
+  # ── Permissive network policy override ──────────────────────────────────
+  - path: patches/netpol-permissive.yaml
+    target:
+      kind: NetworkPolicy
+      name: default-deny-all
+
+commonAnnotations:
+  environment: dev
+
+configMapGenerator: []
+
+# Dev image tags (point to your dev registry or :latest for local)
+images:
+  - name: area51devops/user-service
+    newTag: latest
+  - name: area51devops/transaction-service
+    newTag: latest
+  - name: area51devops/notification-service
+    newTag: latest
+  - name: area51devops/frontend-service
+    newTag: latest

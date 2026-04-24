@@ -1,20 +1,19 @@
 # =============================================================================
-#  Deployment — frontend (Nginx SPA)
-#  Serves the compiled React/Vite SPA.
-#  Nginx proxies /api/* → api-gateway (handled in nginx.conf inside the image).
+#  Deployment — frontend (Nginx SPA + API proxy)
+#  The nginx container serves the React build AND proxies /api/v1/* to
+#  the backend microservices directly (nginx.conf inside the image handles this).
+#  Namespace stamped by Kustomize (dev | prod).
 # =============================================================================
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
-  namespace: frontend
   labels:
     app: frontend
     app.kubernetes.io/part-of: finance-app
     app.kubernetes.io/component: ui
 spec:
-  replicas: 2
+  replicas: 2                   # overridden by Kustomize patch
   selector:
     matchLabels:
       app: frontend

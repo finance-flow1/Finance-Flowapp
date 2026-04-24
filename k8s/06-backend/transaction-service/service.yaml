@@ -1,12 +1,11 @@
 # =============================================================================
-#  Service — transaction-service  (ClusterIP; api-gateway proxies to it)
+#  Service — transaction-service (ClusterIP; frontend nginx proxies /api/v1/transactions)
+#  Namespace stamped by Kustomize (dev | prod).
 # =============================================================================
----
 apiVersion: v1
 kind: Service
 metadata:
   name: transaction-service
-  namespace: backend
   labels:
     app: transaction-service
     app.kubernetes.io/part-of: finance-app

@@ -1,28 +1,16 @@
 # =============================================================================
-#  Roles — one Role per namespace, least-privilege
+#  Role — single Role per environment namespace (least-privilege superset)
+#  Namespace is stamped by Kustomize (dev | prod).
+#
+#  Grants:
+#    secrets     → backend services need DB creds, JWT, RabbitMQ URL
+#    configmaps  → postgres init SQL ConfigMap
+#    pvcs        → postgres pod reads its PVC
 # =============================================================================
-
-# backend: read secrets (DB creds, JWT) and configmaps
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: finance-app-role
-  namespace: backend
-  labels:
-    app.kubernetes.io/part-of: finance-app
-rules:
-  - apiGroups: [""]
-    resources: ["secrets", "configmaps"]
-    verbs: ["get", "list", "watch"]
-
-# data: read secrets (DB credentials) and configmaps (init SQL)
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: finance-app-role
-  namespace: data
   labels:
     app.kubernetes.io/part-of: finance-app
 rules:
@@ -32,17 +20,3 @@ rules:
   - apiGroups: [""]
     resources: ["persistentvolumeclaims"]
     verbs: ["get", "list"]
-
-# frontend: read configmaps only (no secrets needed for static SPA)
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: finance-app-role
-  namespace: frontend
-  labels:
-    app.kubernetes.io/part-of: finance-app
-rules:
-  - apiGroups: [""]
-    resources: ["configmaps"]
-    verbs: ["get", "list", "watch"]

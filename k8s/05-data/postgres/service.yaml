@@ -1,21 +1,19 @@
 # =============================================================================
-#  Service — api-gateway  (ClusterIP; Kgateway HTTPRoute points here)
+#  Service — postgres
 # =============================================================================
----
 apiVersion: v1
 kind: Service
 metadata:
-  name: api-gateway
-  namespace: backend
+  name: postgres
   labels:
-    app: api-gateway
+    app: postgres
     app.kubernetes.io/part-of: finance-app
 spec:
-  type: ClusterIP
   selector:
-    app: api-gateway
+    app: postgres
   ports:
-    - name: http
-      port: 4000
-      targetPort: 4000
+    - name: postgres
+      port: 5432
+      targetPort: 5432
       protocol: TCP
+  clusterIP: None    # Headless — DB pods are addressed directly

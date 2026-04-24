@@ -1,0 +1,50 @@
+# =============================================================================
+#  Kustomize OVERLAY — prod
+#
+#  kubectl apply -k k8s/prod
+#
+#  What this overlay does:
+#    · Creates the "prod" namespace
+#    · Stamps namespace: prod on ALL resources
+#    · Patches replicas → 2+ (HA for production)
+#    · Enforces strict network policy (keeps base default-deny intact)
+#    · Adds strict resource limits patch
+#    · Deploys HPA for autoscaling
+#    · Uses :stable image tags
+# =============================================================================
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: prod
+
+resources:
+  - ../base                          # all base resources
+  - namespace.yaml                   # creates the "prod" namespace first
+  - hpa.yaml                         # HorizontalPodAutoscalers for prod
+
+patches:
+  # ── Replica counts → 2 in prod ──────────────────────────────────────────
+  - path: patches/replicas.yaml
+    target:
+      kind: Deployment
+      labelSelector: "app.kubernetes.io/part-of=finance-app"
+
+  # ── Strict network policy (adds additional prod-only netpols) ───────────
+  - path: patches/netpol-strict.yaml
+    target:
+      kind: NetworkPolicy
+      name: allow-frontend-ingress
+
+commonAnnotations:
+  environment: prod
+
+# Prod uses pinned stable image tags (update on each release)
+images:
+  - name: area51devops/user-service
+    newTag: stable
+  - name: area51devops/transaction-service
+    newTag: stable
+  - name: area51devops/notification-service
+    newTag: stable
+  - name: area51devops/frontend-service
+    newTag: stable

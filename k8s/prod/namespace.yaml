@@ -1,11 +1,11 @@
 # =============================================================================
-#  ServiceAccount — single SA per environment namespace
-#  Namespace is stamped by Kustomize (dev | prod).
-#  Consolidated from old 3-namespace setup (backend + data + frontend).
+#  Namespace — prod
 # =============================================================================
 apiVersion: v1
-kind: ServiceAccount
+kind: Namespace
 metadata:
-  name: finance-app-sa
+  name: prod
   labels:
     app.kubernetes.io/part-of: finance-app
+    environment: prod
+    kubernetes.io/metadata.name: prod

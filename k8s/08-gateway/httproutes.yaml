@@ -1,25 +1,23 @@
 # =============================================================================
-#  HTTPRoutes — traffic routing rules attached to finance-gateway
+#  HTTPRoutes — kgateway routing rules
 #
-#  Routing priority (Gateway API longest-prefix match):
-#    1.  /api/v1/auth          → user-service.backend:5001    (public, no JWT)
-#    2.  /api/v1/users         → user-service.backend:5001    (JWT required @ service)
-#    3.  /api/v1/transactions  → transaction-service.backend:5002
-#    4.  /api/v1/notifications → notification-service.backend:5003
-#    5.  /                     → frontend.frontend:80         (SPA catch-all)
+#  Architecture (matching docker-compose nginx.conf):
+#    /api/v1/auth          → user-service:5001
+#    /api/v1/users         → user-service:5001
+#    /api/v1/transactions  → transaction-service:5002
+#    /api/v1/notifications → notification-service:5003
+#    /                     → frontend:80
 #
-#  NOTE: Each HTTPRoute lives in the same namespace as its backendRef service.
-#  Cross-namespace parentRef (HTTPRoute → Gateway in gate ns) is covered by
-#  referencegrants.yaml.
+#  All backendRefs are in the same namespace as the HTTPRoute.
+#  Namespace is stamped by Kustomize (dev | prod).
 # =============================================================================
 
-# ── /api/v1/* → backend services (route owned by backend namespace) ────────────
+# ── API routes ────────────────────────────────────────────────────────────────
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: api-route
-  namespace: backend
   labels:
     app.kubernetes.io/part-of: finance-app
 spec:
@@ -28,7 +26,6 @@ spec:
       namespace: gate
       sectionName: http
   rules:
-    # Auth routes → user-service
     - matches:
         - path:
             type: PathPrefix
@@ -36,7 +33,6 @@ spec:
       backendRefs:
         - name: user-service
           port: 5001
-    # User profile / admin → user-service
     - matches:
         - path:
             type: PathPrefix
@@ -44,7 +40,6 @@ spec:
       backendRefs:
         - name: user-service
           port: 5001
-    # Transactions → transaction-service
     - matches:
         - path:
             type: PathPrefix
@@ -52,7 +47,6 @@ spec:
       backendRefs:
         - name: transaction-service
           port: 5002
-    # Notifications → notification-service
     - matches:
         - path:
             type: PathPrefix
@@ -61,13 +55,12 @@ spec:
         - name: notification-service
           port: 5003
 
-# ── /* → frontend (route owned by frontend namespace) ────────────────────────
+# ── Frontend catch-all ────────────────────────────────────────────────────────
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: frontend-route
-  namespace: frontend
   labels:
     app: frontend
     app.kubernetes.io/part-of: finance-app
