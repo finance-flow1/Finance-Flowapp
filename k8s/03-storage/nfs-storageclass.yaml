@@ -19,7 +19,7 @@ metadata:
   name: nfs-storage
   labels:
     app.kubernetes.io/part-of: finance-app
-provisioner: cluster.local/nfs-subdir-external-provisioner
+provisioner: k8s-sigs.io/nfs-subdir-external-provisioner
 parameters:
   archiveOnDelete: "false"   # delete NFS folder when PVC is deleted
 reclaimPolicy: Retain        # keep the data even if PVC is deleted (safe default)
