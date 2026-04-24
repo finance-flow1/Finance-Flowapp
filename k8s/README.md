@@ -21,23 +21,24 @@ Internet
 │  dev  OR  prod  namespace                           │
 │                                                     │
 │  ┌──────────┐   ┌──────────────────┐               │
-│  │ frontend │──▶│  user-service    │:5001           │
-│  │  nginx   │──▶│  transaction-svc │:5002 ──▶ MQ   │
-│  │  :80     │──▶│  notification-svc│:5003 ──▶ MQ   │
+│  │ frontend │   │  user-service    │:5001           │
+│  │  nginx   │   │  transaction-svc │:5002 ──▶ MQ   │
+│  │  :80     │   │  notification-svc│:5003 ──▶ MQ   │
 │  └──────────┘   └──────────────────┘               │
 │                        │                            │
 │                        ▼                            │
 │                  ┌──────────┐  ┌──────────┐        │
 │                  │ postgres │  │ rabbitmq │        │
-│                  │  :5432   │  │  :5672   │        │
-│                  └──────────┘  └──────────┘        │
+│                  │ Stateful │  │  :5672   │        │
+│                  │ Set:5432 │  └──────────┘        │
+│                  └──────────┘                      │
 └─────────────────────────────────────────────────────┘
 ```
 
 **Key design decisions:**
 - All services run in **one namespace** per environment (`dev` or `prod`) — no cross-namespace FQDNs
-- `frontend` nginx container handles API proxying (`/api/v1/*` → microservices) — no separate api-gateway
-- Single PostgreSQL with all tables (users, transactions, notifications) instead of per-service DBs
+- `kgateway` handles path rewrites (`/api/v1/*` → stripped prefixes) and routes directly to microservices
+- PostgreSQL is deployed as a StatefulSet with separate logical databases (`user_db`, `txn_db`, `notify_db`) for each microservice
 - RabbitMQ decouples transaction creation from notification delivery
 
 ---
@@ -180,8 +181,8 @@ k8s/
 │
 ├── 05-data/
 │   ├── postgres/
-│   │   ├── configmap-init.yaml     ← init.sql (users + transactions + notifications)
-│   │   ├── deployment.yaml         ← postgres:16-alpine
+│   │   ├── configmap-init.yaml     ← init.sh (user_db + txn_db + notify_db)
+│   │   ├── statefulset.yaml        ← postgres:16-alpine StatefulSet
 │   │   └── service.yaml            ← headless ClusterIP on :5432
 │   └── rabbitmq/
 │       ├── deployment.yaml         ← rabbitmq:3-management-alpine

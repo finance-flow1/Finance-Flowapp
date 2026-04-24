@@ -52,7 +52,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: postgres-secret
-                  key: POSTGRES_DB
+                  key: TXN_DB_NAME
             - name: DB_USER
               valueFrom:
                 secretKeyRef:

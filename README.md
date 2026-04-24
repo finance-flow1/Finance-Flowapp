@@ -31,25 +31,25 @@ A production-grade microservices application built with **Node.js / Express**, *
                         └──────────────┬──────────────┘
                                        │
                         ┌──────────────▼──────────────┐
-                        │         Nginx (client)       │  ← Serves React SPA
-                        │  /api/* → split routing      │  ← Intelligent proxy
+                        │      Kubernetes Gateway API │  ← Handles path rewrites
+                        │      kgateway               │
                         └─────┬────────┬────────┬─────┘
                               │        │        │
                ┌──────────────▼──┐  ┌──▼────────▼──┐  ┌──▼───────────────┐
                │    User Service  │  │ Transaction  │  │  Notification     │
                │    Port 5001     │  │ Service      │  │  Service           │
-               │  • Auth / RBAC   │  │ Port 5002    │  │  Port 5003         │
-               │  • Profile       │  │ • CRUD Ops   │  │  • Real-time Alerts│
+               │  • /auth, /users │  │ Port 5002    │  │  Port 5003         │
+               │  • Profile       │  │ • /transactions│  │  • /notifications  │
                │  • User Mgmt     │  │ • Analytics  │  │  • System Notifs   │
                └──────────┬───────┘  └──────┬───────┘  └──────┬────────────┘
                           │                 │                 │
                           └──────────┬──────┴─────────────────┘
                                      │
                         ┌────────────▼────────────────┐
-                        │       PostgreSQL             │  Port 5432
-                        │  • users table               │
-                        │  • transactions table        │
-                        │  • Indexed columns           │
+                        │ PostgreSQL StatefulSet       │  Port 5432
+                        │  • user_db                   │
+                        │  • txn_db                    │
+                        │  • notify_db                 │
                         └─────────────────────────────┘
 
 Observability (separate network):
@@ -79,7 +79,7 @@ Finance-Flowapp/
 │       └── src/index.js           ← In-memory event store
 │
 ├── client/                       ← Presentation layer (Premium React SPA)
-│   ├── nginx.conf                ← Path-based routing for all services
+│   ├── nginx.conf                ← Pure SPA server (no proxies)
 │   └── src/
 │       ├── api/api.js             ← Structured domain API client
 │       ├── pages/                 ← Dashboard, Transactions, Admin [NEW]
@@ -97,7 +97,7 @@ Finance-Flowapp/
 
 | Layer | Technology |
 |---|---|
-| Routing (Docker) | Nginx (Path-based proxy) |
+| Routing (Docker) | Vite Proxy (Local Dev) |
 | Routing (K8s) | Kubernetes Gateway API (kgateway) |
 | Business Services | Node.js 20, Express |
 | Database | PostgreSQL 16 |
@@ -151,24 +151,23 @@ docker compose up --build
 
 ## API Reference
 
-Routing is decentralized. Nginx/K8s handles path-based matching:
+Routing is handled directly by `kgateway` which rewrites `/api/v1/` prefixes before passing to the backend.
 
-### Auth & Users (`/api/v1/auth`, `/api/v1/users`)
-- `POST /api/v1/auth/register` - New user signup
-- `POST /api/v1/auth/login` - Get JWT
-- `GET /api/v1/users/me` - Current profile
-- `GET /api/v1/users` - **[ADMIN]** List all users
+### Auth & Users (Frontend calls `/api/v1/...`, backend receives `/auth` or `/users`)
+- `POST /auth/register` - New user signup
+- `POST /auth/login` - Get JWT
+- `GET /users/me` - Current profile
+- `GET /users` - **[ADMIN]** List all users
 
-### Transactions (`/api/v1/transactions`)
-- `GET /api/v1/transactions` - Filtered/Paginated list
-- `POST /api/v1/transactions` - Record new activity
-- `GET /api/v1/transactions/analytics/summary` - Personal metrics
-- `GET /api/v1/transactions/admin/stats` - **[ADMIN]** Global system stats
+### Transactions (Frontend calls `/api/v1/transactions`, backend receives `/transactions`)
+- `GET /transactions` - Filtered/Paginated list
+- `POST /transactions` - Record new activity
+- `GET /transactions/analytics/summary` - Personal metrics
+- `GET /transactions/admin/stats` - **[ADMIN]** Global system stats
 
-### Notifications (`/api/v1/notifications`)
-- `GET /api/v1/notifications` - Get user alerts
-- `POST /api/v1/notifications` - Create new notification
-- `PATCH /api/v1/notifications/:id/read` - Mark as read
+### Notifications (Frontend calls `/api/v1/notifications`, backend receives `/notifications`)
+- `GET /notifications` - Get user alerts
+- `PATCH /notifications/:id/read` - Mark as read
 
 ---
 

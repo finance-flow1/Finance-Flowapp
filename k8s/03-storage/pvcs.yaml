@@ -6,18 +6,4 @@
 #  StorageClass: nfs-storage (apply 03-storage/nfs-storageclass.yaml first)
 # =============================================================================
 
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: postgres-pvc
-  labels:
-    app: postgres
-    app.kubernetes.io/part-of: finance-app
-spec:
-  accessModes:
-    - ReadWriteOnce
-  storageClassName: nfs-storage
-  resources:
-    requests:
-      storage: 20Gi
+

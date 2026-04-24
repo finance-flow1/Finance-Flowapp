@@ -28,7 +28,7 @@ resources:
 
   # Data layer
   - ../05-data/postgres/configmap-init.yaml
-  - ../05-data/postgres/deployment.yaml
+  - ../05-data/postgres/statefulset.yaml
   - ../05-data/postgres/service.yaml
   - ../05-data/rabbitmq/deployment.yaml
   - ../05-data/rabbitmq/service.yaml
