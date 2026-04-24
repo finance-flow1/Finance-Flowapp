@@ -32,9 +32,10 @@ spec:
             value: /api/v1/auth
       filters:
         - type: URLRewrite
-          path:
-            type: ReplacePrefixMatch
-            replacePrefixMatch: /auth
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /auth
       backendRefs:
         - name: user-service
           port: 5001
@@ -44,9 +45,10 @@ spec:
             value: /api/v1/users
       filters:
         - type: URLRewrite
-          path:
-            type: ReplacePrefixMatch
-            replacePrefixMatch: /users
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /users
       backendRefs:
         - name: user-service
           port: 5001
@@ -56,9 +58,10 @@ spec:
             value: /api/v1/transactions
       filters:
         - type: URLRewrite
-          path:
-            type: ReplacePrefixMatch
-            replacePrefixMatch: /transactions
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /transactions
       backendRefs:
         - name: transaction-service
           port: 5002
@@ -68,9 +71,10 @@ spec:
             value: /api/v1/notifications
       filters:
         - type: URLRewrite
-          path:
-            type: ReplacePrefixMatch
-            replacePrefixMatch: /notifications
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /notifications
       backendRefs:
         - name: notification-service
           port: 5003
