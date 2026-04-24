@@ -6,6 +6,9 @@
 #    kubectl apply -k k8s/dev
 #    kubectl apply -k k8s/prod
 #
+#  Image tags, namespace, replicas, and policies are injected by the dev/prod
+#  overlays. The base deployments leave image tags empty so overlays own them.
+#
 #  Gateway infrastructure is applied separately (once per cluster):
 #    kubectl apply -k k8s/08-gateway
 # =============================================================================

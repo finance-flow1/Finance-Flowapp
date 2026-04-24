@@ -1,5 +1,5 @@
 # =============================================================================
-#  Kustomize OVERLAY — dev
+#  Kustomize OVERLAY — dev  (maps to the Git dev branch)
 #
 #  kubectl apply -k k8s/dev
 #
@@ -8,7 +8,11 @@
 #    · Stamps namespace: dev on ALL resources
 #    · Patches replicas → 1 (cost-saving for dev)
 #    · Applies permissive network policy (allow all same-namespace traffic)
-#    · Adds IMAGE tag suffix :dev for local image variants
+#    · Uses :dev image tags built from the dev branch
+#
+#  CI/CD tip:
+#    Build images with :dev tag when the dev branch is pushed.
+#    Then run:  kubectl apply -k k8s/dev
 # =============================================================================
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
@@ -31,16 +35,17 @@ patches:
 
 commonAnnotations:
   environment: dev
+  git-branch: dev
 
 configMapGenerator: []
 
-# Dev image tags (point to your dev registry or :latest for local)
+# Dev branch image tags (:dev)
 images:
   - name: aswin1015/finance-flowapp-user-service
-    newTag: latest
+    newTag: dev
   - name: aswin1015/finance-flowapp-transaction-service
-    newTag: latest
+    newTag: dev
   - name: aswin1015/finance-flowapp-notification-service
-    newTag: latest
+    newTag: dev
   - name: aswin1015/finance-flowapp-client
-    newTag: latest
+    newTag: dev

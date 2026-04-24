@@ -34,7 +34,7 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
         - name: user-service
-          image: aswin1015/finance-flowapp-user-service:latest
+          image: aswin1015/finance-flowapp-user-service
           imagePullPolicy: Always
           ports:
             - containerPort: 5001

@@ -43,6 +43,46 @@ Internet
 
 ---
 
+## Git Branching Strategy & K8s Mapping
+
+This repo uses two long-lived Git branches that map 1-to-1 to Kustomize overlays:
+
+| Git branch | Kustomize overlay | Target namespace | Image tag | Purpose |
+|---|---|---|---|---|
+| `dev`  | `k8s/dev`  | `dev`  | `:dev`    | Continuous integration, testing, feature previews |
+| `prod` | `k8s/prod` | `prod` | `:stable` | Production releases (pin to a semver tag in CI) |
+
+### How the flow works
+
+1. **Push to `dev` branch**
+   - CI builds Docker images and pushes them with the `:dev` tag.
+   - CI runs `kubectl apply -k k8s/dev`.
+   - Every resource lands in the `dev` namespace and carries the annotation `git-branch: dev`.
+
+2. **Merge `dev` → `prod` branch**
+   - CI builds Docker images and pushes them with the `:stable` (or `vX.Y.Z`) tag.
+   - CI runs `kubectl apply -k k8s/prod`.
+   - Every resource lands in the `prod` namespace and carries the annotation `git-branch: prod`.
+
+### Why Kustomize overlays fit this model
+
+- **`base/`** holds shared, environment-agnostic manifests. It is **never** applied directly.
+- **`dev/`** and **`prod/`** are self-contained overlays. The CI job on each branch only needs to run one `kubectl apply -k` command pointing at its matching overlay.
+- Because the overlays stamp `namespace`, `image tag`, `replicas`, `network policy`, and `annotations` at build time, there is **zero risk** of a dev build leaking into the prod namespace (and vice-versa) as long as the CI job targets the correct folder.
+
+### Branch-specific customisations at a glance
+
+| Customisation | `dev` | `prod` |
+|---|---|---|
+| Image tag | `:dev` | `:stable` |
+| `imagePullPolicy` | `Always` | `IfNotPresent` |
+| Replicas (user/txn/notify) | 1 | 2 |
+| Replicas (frontend) | 1 | 3 |
+| HPA | — | ✅ |
+| Network policy | Permissive | Strict |
+
+---
+
 ## Prerequisites
 
 ### 1. Kubernetes Cluster
@@ -130,12 +170,13 @@ kubectl delete -k k8s/08-gateway
 | Setting | `dev` | `prod` |
 |---|---|---|
 | Namespace | `dev` | `prod` |
-| Image tags | `:latest` | `:stable` |
+| Image tags | `:dev` | `:stable` |
 | user-service replicas | 1 | 2 (HPA: max 6) |
 | transaction-service replicas | 1 | 2 (HPA: max 8) |
 | notification-service replicas | 1 | 2 (HPA: max 4) |
 | frontend replicas | 1 | 3 (HPA: max 10) |
 | Network Policy | Permissive (allow-all same-ns) | Strict (deny-all + explicit allow) |
+| imagePullPolicy | `Always` | `IfNotPresent` |
 | HPA | ❌ | ✅ |
 
 ---
@@ -160,7 +201,8 @@ k8s/
 │   ├── hpa.yaml                    ← HPA for all 4 services
 │   └── patches/
 │       ├── replicas.yaml           ← 2/2/2/3 replicas
-│       └── netpol-strict.yaml      ← lock frontend ingress to CIDR
+│       ├── netpol-strict.yaml      ← lock frontend ingress to CIDR
+│       └── image-pull-policy.yaml  ← IfNotPresent for pinned stable tags
 │
 ├── 01-rbac/
 │   ├── service-accounts.yaml       ← single SA (namespace stamped by Kustomize)

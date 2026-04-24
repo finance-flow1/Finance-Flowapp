@@ -1,0 +1,58 @@
+# =============================================================================
+#  Patch — imagePullPolicy for prod
+#
+#  Prod uses pinned/stable tags. IfNotPresent avoids unnecessary pulls
+#  and prevents accidentally fetching a mutated tag from the registry.
+# =============================================================================
+
+# user-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+spec:
+  template:
+    spec:
+      containers:
+        - name: user-service
+          imagePullPolicy: IfNotPresent
+
+# transaction-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transaction-service
+spec:
+  template:
+    spec:
+      containers:
+        - name: transaction-service
+          imagePullPolicy: IfNotPresent
+
+# notification-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+spec:
+  template:
+    spec:
+      containers:
+        - name: notification-service
+          imagePullPolicy: IfNotPresent
+
+# frontend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  template:
+    spec:
+      containers:
+        - name: frontend
+          imagePullPolicy: IfNotPresent

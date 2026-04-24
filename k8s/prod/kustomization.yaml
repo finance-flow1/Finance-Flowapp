@@ -1,5 +1,5 @@
 # =============================================================================
-#  Kustomize OVERLAY — prod
+#  Kustomize OVERLAY — prod  (maps to the Git prod branch)
 #
 #  kubectl apply -k k8s/prod
 #
@@ -10,7 +10,12 @@
 #    · Enforces strict network policy (keeps base default-deny intact)
 #    · Adds strict resource limits patch
 #    · Deploys HPA for autoscaling
-#    · Uses :stable image tags
+#    · Uses :stable image tags (pin to a release tag or commit SHA in CI)
+#    · Sets imagePullPolicy: IfNotPresent for pinned tags
+#
+#  CI/CD tip:
+#    Build images with :stable (or a version tag) when the prod branch is pushed.
+#    Then run:  kubectl apply -k k8s/prod
 # =============================================================================
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
@@ -32,8 +37,12 @@ patches:
       kind: NetworkPolicy
       name: allow-frontend-ingress
 
+  # ── imagePullPolicy: IfNotPresent for pinned prod tags ──────────────────
+  - path: patches/image-pull-policy.yaml
+
 commonAnnotations:
   environment: prod
+  git-branch: prod
 
 # Prod uses pinned stable image tags (update on each release)
 images:
