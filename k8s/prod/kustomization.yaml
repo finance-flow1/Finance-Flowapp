@@ -37,11 +37,11 @@ commonAnnotations:
 
 # Prod uses pinned stable image tags (update on each release)
 images:
-  - name: area51devops/user-service
+  - name: aswin1015/finance-flowapp-user-service
     newTag: stable
-  - name: area51devops/transaction-service
+  - name: aswin1015/finance-flowapp-transaction-service
     newTag: stable
-  - name: area51devops/notification-service
+  - name: aswin1015/finance-flowapp-notification-service
     newTag: stable
-  - name: area51devops/frontend-service
+  - name: aswin1015/finance-flowapp-client
     newTag: stable

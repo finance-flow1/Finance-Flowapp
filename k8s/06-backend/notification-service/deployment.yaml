@@ -34,7 +34,7 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
         - name: notification-service
-          image: area51devops/notification-service:latest
+          image: aswin1015/finance-flowapp-notification-service:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 5003

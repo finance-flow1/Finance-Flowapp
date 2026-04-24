@@ -36,11 +36,11 @@ configMapGenerator: []
 
 # Dev image tags (point to your dev registry or :latest for local)
 images:
-  - name: area51devops/user-service
+  - name: aswin1015/finance-flowapp-user-service
     newTag: latest
-  - name: area51devops/transaction-service
+  - name: aswin1015/finance-flowapp-transaction-service
     newTag: latest
-  - name: area51devops/notification-service
+  - name: aswin1015/finance-flowapp-notification-service
     newTag: latest
-  - name: area51devops/frontend-service
+  - name: aswin1015/finance-flowapp-client
     newTag: latest

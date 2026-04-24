@@ -34,7 +34,7 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
         - name: transaction-service
-          image: area51devops/transaction-service:latest
+          image: aswin1015/finance-flowapp-transaction-service:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 5002

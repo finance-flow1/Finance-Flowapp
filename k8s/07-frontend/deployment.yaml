@@ -31,7 +31,7 @@ spec:
       serviceAccountName: finance-app-sa
       containers:
         - name: frontend
-          image: area51devops/frontend-service:latest
+          image: aswin1015/finance-flowapp-client:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 80
